@@ -17,7 +17,7 @@ export class User {
   })
   email!: string;
 
-  @Prop({ required: true, minLength: 60, maxLength: 60, select: false })
+  @Prop({ required: true, minLength: 6, maxLength: 60, select: false })
   password!: string;
 }
 

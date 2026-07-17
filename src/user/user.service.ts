@@ -17,7 +17,17 @@ export class UserService {
       password: createUserDto.password,
     });
 
-    return user;
+    return {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    };
+  }
+
+  async findByEmail(email: string) {
+    return await this.userModel.findOne({ email });
   }
 
   findAll() {
