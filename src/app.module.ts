@@ -2,6 +2,7 @@ import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
+import { JwtModule } from '@nestjs/jwt';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -26,6 +27,17 @@ import configuration from './config/configuration';
           logger.log('MongoDB Connected Successfully');
 
           return connection;
+        },
+      }),
+    }),
+
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      global: true,
+      useFactory: (config: ConfigService) => ({
+        secret: config.getOrThrow<string>('jwtSecret'),
+        signOptions: {
+          expiresIn: config.getOrThrow('jwtExpiresIn'),
         },
       }),
     }),

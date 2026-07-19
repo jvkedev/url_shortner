@@ -11,19 +11,9 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = await this.userModel.create({
-      name: createUserDto.name,
-      email: createUserDto.email,
-      password: createUserDto.password,
-    });
+    const user = await this.userModel.create(createUserDto);
 
-    return {
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      },
-    };
+    return user;
   }
 
   async findByEmail(email: string) {
@@ -34,8 +24,8 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    return await this.userModel.findById(id);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
