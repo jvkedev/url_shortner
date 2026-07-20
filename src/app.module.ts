@@ -3,10 +3,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { JwtModule } from '@nestjs/jwt';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthService } from './auth/auth.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
@@ -18,6 +20,7 @@ import configuration from './config/configuration';
       load: [configuration],
     }),
 
+    // Database (Mongodb) Module
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -31,6 +34,7 @@ import configuration from './config/configuration';
       }),
     }),
 
+    // JWT Token
     JwtModule.registerAsync({
       inject: [ConfigService],
       global: true,
@@ -42,10 +46,30 @@ import configuration from './config/configuration';
       }),
     }),
 
+    // Rate Limiting
+    ThrottlerModule.forRootAsync({
+      useFactory: () => ({
+        throttlers: [
+          {
+            ttl: 60000,
+            limit: 10,
+          },
+        ],
+      }),
+    }),
+
     UserModule,
     AuthModule,
   ],
+
   controllers: [AppController],
-  providers: [AppService, AuthService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+
+    AppService,
+  ],
 })
 export class AppModule {}
