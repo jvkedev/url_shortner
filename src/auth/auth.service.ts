@@ -1,9 +1,14 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from '../user/user.service';
-import { CreateUserDto } from '../user/dto/create-user.dto';
+import { RegisterUserDto } from '../user/dto/register-user.dto';
+import { LoginUserDto } from '../user/dto/login-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -24,9 +29,9 @@ export class AuthService {
     };
   }
 
-  async register(createUserDto: CreateUserDto) {
+  async register(registerUserDto: RegisterUserDto) {
     const existingUser = await this.userService.findByEmail(
-      createUserDto.email,
+      registerUserDto.email,
     );
 
     if (existingUser) {
@@ -34,10 +39,10 @@ export class AuthService {
     }
 
     try {
-      const hash = await bcrypt.hash(createUserDto.password, 10);
+      const hash = await bcrypt.hash(registerUserDto.password, 10);
 
       const user = await this.userService.create({
-        ...createUserDto,
+        ...registerUserDto,
         password: hash,
       });
 
@@ -53,5 +58,21 @@ export class AuthService {
 
       throw error;
     }
+  }
+
+  async login(loginUserDto: LoginUserDto) {
+    const user = await this.userService.findByEmail(loginUserDto.email);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isMatch = await bcrypt.compare(loginUserDto.password, user.password);
+
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return this.generateAccessToken(user);
   }
 }
