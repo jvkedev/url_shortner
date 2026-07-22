@@ -6,11 +6,13 @@ import { Connection } from 'mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mail/mail.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -46,6 +48,24 @@ import configuration from './config/configuration';
       }),
     }),
 
+    // Mail Service
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          host: config.getOrThrow<string>('mailHost'),
+          port: config.getOrThrow<number>('mailPort'),
+          auth: {
+            user: config.getOrThrow<string>('mailUser'),
+            pass: config.getOrThrow<string>('mailPassword'),
+          },
+        },
+        defaults: {
+          from: config.getOrThrow<string>('mailFrom'),
+        },
+      }),
+    }),
+
     // Rate Limiting
     ThrottlerModule.forRootAsync({
       useFactory: () => ({
@@ -60,6 +80,7 @@ import configuration from './config/configuration';
 
     UserModule,
     AuthModule,
+    MailModule,
   ],
 
   controllers: [AppController],

@@ -19,6 +19,9 @@ export class User {
 
   @Prop({ required: true, minLength: 60, maxLength: 60, select: false })
   password!: string;
+
+  @Prop({ default: false })
+  isVerified!: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

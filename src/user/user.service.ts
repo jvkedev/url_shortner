@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schemas/user.schema';
+import { after } from 'node:test';
 
 @Injectable()
 export class UserService {
@@ -18,11 +19,27 @@ export class UserService {
     return await this.userModel.findOne({ email }).select('+password');
   }
 
+  async verifyEmail(id: string) {
+    return await this.userModel.findByIdAndUpdate(
+      id,
+      {
+        isVerified: true,
+      },
+      {
+        returnDocument: 'after',
+      },
+    );
+  }
+
   findAll() {
     return `This action returns all user`;
   }
 
   async findOne(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user id');
+    }
+
     return await this.userModel.findById(id);
   }
 
