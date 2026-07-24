@@ -1,4 +1,5 @@
 export interface JwtPayload {
   sub: string;
-  type: 'access' | 'email-verification';
+  type: 'access' | 'refresh' | 'email-verification';
+  jti?: string; // JWT ID for token uniqueness
 }

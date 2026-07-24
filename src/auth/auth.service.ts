@@ -4,7 +4,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import bcrypt from 'bcrypt';
+import { randomUUID, createHash } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 import { UserService } from '../user/user.service';
 import { RegisterUserDto } from '../user/dto/register-user.dto';
@@ -17,35 +19,47 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
     private readonly mailService: MailService,
   ) {}
 
   private async generateAccessToken(user: {
     _id: { toString(): string };
-  }): Promise<{ accessToken: string }> {
+  }): Promise<string> {
     const payload: JwtPayload = {
       sub: user._id.toString(),
       type: 'access',
     };
 
-    return {
-      accessToken: await this.jwtService.signAsync(payload),
+    return this.jwtService.signAsync(payload);
+  }
+
+  private async generateRefreshToken(user: {
+    _id: { toString(): string };
+  }): Promise<string> {
+    const payload: JwtPayload = {
+      sub: user._id.toString(),
+      type: 'refresh',
+      jti: randomUUID(), // Unique ID ensures each token is different
     };
+
+    return this.jwtService.signAsync(payload, {
+      secret: this.configService.getOrThrow<string>('jwtRefreshSecret'),
+      expiresIn: this.configService.getOrThrow('jwtRefreshExpiresIn'),
+    });
   }
 
   private async generateEmailVerificationToken(user: {
     _id: { toString(): string };
-  }): Promise<{ verificationToken: string }> {
+  }): Promise<string> {
     const payload: JwtPayload = {
       sub: user._id.toString(),
       type: 'email-verification',
     };
 
-    return {
-      verificationToken: await this.jwtService.signAsync(payload, {
-        expiresIn: '15m',
-      }),
-    };
+    return this.jwtService.signAsync(payload, {
+      expiresIn: '15m',
+    });
   }
 
   async register(registerUserDto: RegisterUserDto) {
@@ -65,8 +79,7 @@ export class AuthService {
         password: hash,
       });
 
-      const { verificationToken } =
-        await this.generateEmailVerificationToken(user);
+      const verificationToken = await this.generateEmailVerificationToken(user);
 
       await this.mailService.sendVerificationEmail(
         user.email,
@@ -108,7 +121,28 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.generateAccessToken(user);
+    if (!user.isVerified) {
+      throw new UnauthorizedException(
+        'Please verify your email before logging in',
+      );
+    }
+
+    const accessToken = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
+
+    const hashedRefreshToken = createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
+
+    await this.userService.updateRefreshToken(
+      user._id.toString(),
+      hashedRefreshToken,
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   async verifyEmail(token: string) {
@@ -133,5 +167,57 @@ export class AuthService {
     return {
       message: 'Email verified successfully.',
     };
+  }
+
+  async refresh(refreshToken: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(
+        refreshToken,
+        {
+          secret: this.configService.getOrThrow('jwtRefreshSecret'),
+        },
+      );
+
+      if (payload.type !== 'refresh') {
+        throw new UnauthorizedException('Invalid token');
+      }
+
+      const user = await this.userService.findOne(payload.sub);
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid token');
+      }
+
+      if (!user.refreshToken) {
+        throw new UnauthorizedException('Invalid token');
+      }
+
+      const incomingHash = createHash('sha256')
+        .update(refreshToken)
+        .digest('hex');
+
+      if (incomingHash !== user.refreshToken) {
+        throw new UnauthorizedException('Invalid token');
+      }
+
+      const newAccessToken = await this.generateAccessToken(user);
+      const newRefreshToken = await this.generateRefreshToken(user);
+
+      const hashedRefreshToken = createHash('sha256')
+        .update(newRefreshToken)
+        .digest('hex');
+
+      await this.userService.updateRefreshToken(
+        user._id.toString(),
+        hashedRefreshToken,
+      );
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 }

@@ -41,9 +41,9 @@ import configuration from './config/configuration';
       inject: [ConfigService],
       global: true,
       useFactory: (config: ConfigService) => ({
-        secret: config.getOrThrow<string>('jwtSecret'),
+        secret: config.getOrThrow<string>('jwtAccessSecret'),
         signOptions: {
-          expiresIn: config.getOrThrow('jwtExpiresIn'),
+          expiresIn: config.getOrThrow('jwtAccessExpiresIn'),
         },
       }),
     }),

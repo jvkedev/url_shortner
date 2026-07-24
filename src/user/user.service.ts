@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schemas/user.schema';
-import { after } from 'node:test';
 
 @Injectable()
 export class UserService {
@@ -25,6 +24,16 @@ export class UserService {
       {
         isVerified: true,
       },
+      {
+        returnDocument: 'after',
+      },
+    );
+  }
+
+  async updateRefreshToken(userId: string, refreshToken: string) {
+    return this.userModel.findByIdAndUpdate(
+      userId,
+      { refreshToken },
       {
         returnDocument: 'after',
       },
