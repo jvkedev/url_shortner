@@ -42,4 +42,14 @@ export class AuthController {
       isVerified: user.isVerified,
     };
   }
+
+  @Post('logout')
+  @UseGuards(AuthGuard)
+  async logout(@CurrentUser() user: UserDocument) {
+    await this.authService.logout(user._id.toString());
+
+    return {
+      message: 'Logged out successfully',
+    };
+  }
 }

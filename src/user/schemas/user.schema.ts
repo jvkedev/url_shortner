@@ -23,8 +23,8 @@ export class User {
   @Prop({ default: false })
   isVerified!: boolean;
 
-  @Prop()
-  refreshToken?: string;
+  @Prop({ type: String, default: null })
+  refreshToken!: string | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

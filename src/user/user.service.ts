@@ -3,7 +3,6 @@ import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { RegisterUserDto } from './dto/register-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schemas/user.schema';
 import type { UserDocument } from './schemas/user.schema';
 
@@ -31,7 +30,7 @@ export class UserService {
     );
   }
 
-  async updateRefreshToken(userId: string, refreshToken: string) {
+  async updateRefreshToken(userId: string, refreshToken: string | null) {
     return this.userModel.findByIdAndUpdate(
       userId,
       { refreshToken },
@@ -51,13 +50,5 @@ export class UserService {
     }
 
     return await this.userModel.findById(id);
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
   }
 }

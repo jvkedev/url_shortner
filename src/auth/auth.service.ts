@@ -220,4 +220,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
+
+  async logout(userId: string): Promise<void> {
+    await this.userService.updateRefreshToken(userId, null);
+  }
 }
