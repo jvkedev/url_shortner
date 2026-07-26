@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schemas/user.schema';
+import type { UserDocument } from './schemas/user.schema';
 
 @Injectable()
 export class UserService {
@@ -44,7 +45,7 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<UserDocument | null> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid user id');
     }

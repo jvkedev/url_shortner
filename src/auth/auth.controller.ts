@@ -1,8 +1,12 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { RegisterUserDto } from '../user/dto/register-user.dto';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from '../user/dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { AuthGuard } from './guards/auth.guard';
+import { User as CurrentUser } from './decorators/user.decorator';
+import type { UserDocument } from '../user/schemas/user.schema';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -26,5 +30,16 @@ export class AuthController {
   @Post('refresh')
   refresh(@Body() { refreshToken }: RefreshTokenDto) {
     return this.authService.refresh(refreshToken);
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard)
+  getMe(@CurrentUser() user: UserDocument): UserResponseDto {
+    return {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      isVerified: user.isVerified,
+    };
   }
 }
