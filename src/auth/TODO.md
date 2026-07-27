@@ -15,7 +15,7 @@
 
 ## 🔗 URL Features
 
-- [ ] Create Short URL
+- [x] Create Short URL
 - [ ] Get User URLs
 - [ ] Update URL
 - [ ] Delete URL
