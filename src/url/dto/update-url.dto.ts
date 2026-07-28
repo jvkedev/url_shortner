@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, IsUrl, MaxLength } from 'class-validator';
 
-export class CreateUrlDto {
+export class UpdateUrlDto {
   @IsString()
   @IsNotEmpty()
   @IsUrl({

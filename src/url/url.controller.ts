@@ -6,12 +6,15 @@ import {
   Body,
   Redirect,
   Param,
+  Patch,
 } from '@nestjs/common';
 import { UrlService } from './url.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { User as CurrentUser } from '../auth/decorators/user.decorator';
 import type { UserDocument } from '../user/schemas/user.schema';
+import { UpdateUrlDto } from './dto/update-url.dto';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('url')
 export class UrlController {
@@ -39,6 +42,16 @@ export class UrlController {
   @UseGuards(AuthGuard)
   getUserUrls(@CurrentUser() user: UserDocument) {
     return this.urlService.getUserUrls(user._id.toString());
+  }
+
+  @Patch(':id')
+  @UseGuards(AuthGuard)
+  updateUserUrl(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateUrlDto: UpdateUrlDto,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.urlService.updateUserUrl(id, user.id, updateUrlDto);
   }
 }
 

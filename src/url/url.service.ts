@@ -8,6 +8,7 @@ import { Url } from './schemas/url.schema';
 import { Model, Types } from 'mongoose';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UrlResponseDto } from './dto/url-response.dto';
+import { UpdateUrlDto } from './dto/update-url.dto';
 
 @Injectable()
 export class UrlService {
@@ -67,6 +68,7 @@ export class UrlService {
       shortCode: url.shortCode,
       clicks: url.clicks,
       createdAt: url.createdAt,
+      updatedAt: url.updatedAt,
     };
   }
 
@@ -99,6 +101,35 @@ export class UrlService {
       shortCode: url.shortCode,
       clicks: url.clicks,
       createdAt: url.createdAt,
+      updatedAt: url.updatedAt,
     }));
+  }
+
+  async updateUserUrl(_id: string, owner: string, updateUrlDto: UpdateUrlDto) {
+    const url = await this.urlModel.findOneAndUpdate(
+      {
+        _id,
+        owner,
+      },
+      {
+        originalUrl: updateUrlDto.originalUrl,
+      },
+      {
+        returnDocument: 'after',
+      },
+    );
+
+    if (!url) {
+      throw new NotFoundException('Url not found');
+    }
+
+    return {
+      id: url.id,
+      originalUrl: url.originalUrl,
+      shortCode: url.shortCode,
+      clicks: url.clicks,
+      createdAt: url.createdAt,
+      updatedAt: url.updatedAt,
+    };
   }
 }
