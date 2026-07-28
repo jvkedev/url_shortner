@@ -17,7 +17,7 @@
 
 - [x] Create Short URL
 - [x] Redirect to Original URL  
-- [ ] Get User URLs
+- [x] Get User URLs
 - [ ] Update URL
 - [ ] Delete URL
 

@@ -34,6 +34,12 @@ export class UrlController {
       url: originalUrl,
     };
   }
+
+  @Get()
+  @UseGuards(AuthGuard)
+  getUserUrls(@CurrentUser() user: UserDocument) {
+    return this.urlService.getUserUrls(user._id.toString());
+  }
 }
 
 // TODO: Move this endpoint to the application root (GET /:shortCode)

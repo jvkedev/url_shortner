@@ -89,4 +89,16 @@ export class UrlService {
 
     return url.originalUrl;
   }
+
+  async getUserUrls(owner: string): Promise<UrlResponseDto[]> {
+    const urls = await this.urlModel.find({ owner });
+
+    return urls.map((url) => ({
+      id: url.id,
+      originalUrl: url.originalUrl,
+      shortCode: url.shortCode,
+      clicks: url.clicks,
+      createdAt: url.createdAt,
+    }));
+  }
 }
