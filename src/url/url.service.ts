@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Url } from './schemas/url.schema';
 import { Model, Types } from 'mongoose';
@@ -64,5 +68,25 @@ export class UrlService {
       clicks: url.clicks,
       createdAt: url.createdAt,
     };
+  }
+
+  async resolveShortUrl(shortCode: string) {
+    const url = await this.urlModel.findOneAndUpdate(
+      { shortCode },
+      {
+        $inc: {
+          clicks: 1,
+        },
+      },
+      {
+        returnDocument: 'after',
+      },
+    );
+
+    if (!url) {
+      throw new NotFoundException('Url not found');
+    }
+
+    return url.originalUrl;
   }
 }

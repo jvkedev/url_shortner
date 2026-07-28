@@ -1,4 +1,12 @@
-import { Post, Controller, UseGuards, Body } from '@nestjs/common';
+import {
+  Post,
+  Get,
+  Controller,
+  UseGuards,
+  Body,
+  Redirect,
+  Param,
+} from '@nestjs/common';
 import { UrlService } from './url.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CreateUrlDto } from './dto/create-url.dto';
@@ -17,4 +25,17 @@ export class UrlController {
   ) {
     return this.urlService.create(createUrlDto, user._id);
   }
+
+  @Get(':shortCode')
+  @Redirect()
+  async redirectToOriginalUrl(@Param('shortCode') shortCode: string) {
+    const originalUrl = await this.urlService.resolveShortUrl(shortCode);
+    return {
+      url: originalUrl,
+    };
+  }
 }
+
+// TODO: Move this endpoint to the application root (GET /:shortCode)
+// so shortened URLs become http://domain.com/abc123 instead of
+// http://domain.com/url/abc123.

@@ -16,10 +16,10 @@
 ## 🔗 URL Features
 
 - [x] Create Short URL
+- [x] Redirect to Original URL  
 - [ ] Get User URLs
 - [ ] Update URL
 - [ ] Delete URL
-- [ ] Redirect to Original URL
 
 ---
 
