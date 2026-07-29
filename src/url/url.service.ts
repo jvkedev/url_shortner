@@ -132,4 +132,19 @@ export class UrlService {
       updatedAt: url.updatedAt,
     };
   }
+
+  async deleteUserUrl(_id: string, owner: string) {
+    const deletedUrl = await this.urlModel.findOneAndDelete({
+      _id,
+      owner,
+    });
+
+    if (!deletedUrl) {
+      throw new NotFoundException('Url not found');
+    }
+
+    return {
+      message: 'Url deleted successfully',
+    };
+  }
 }

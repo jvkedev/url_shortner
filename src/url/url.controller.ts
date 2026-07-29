@@ -7,6 +7,7 @@ import {
   Redirect,
   Param,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { UrlService } from './url.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -52,6 +53,15 @@ export class UrlController {
     @CurrentUser() user: UserDocument,
   ) {
     return this.urlService.updateUserUrl(id, user.id, updateUrlDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard)
+  async deleteUserUrl(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.urlService.deleteUserUrl(id, user.id);
   }
 }
 

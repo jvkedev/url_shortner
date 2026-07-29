@@ -19,7 +19,7 @@
 - [x] Redirect to Original URL  
 - [x] Get User URLs
 - [x] Update URL
-- [ ] Delete URL
+- [x] Delete URL
 
 ---
 
