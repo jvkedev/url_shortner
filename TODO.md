@@ -26,7 +26,7 @@
 ## 📊 Analytics
 
 - [x] Click Count
-- [ ] Last Visited
+- [x] Last Visited
 - [x] Created Date
 - [ ] Expiration Date
 

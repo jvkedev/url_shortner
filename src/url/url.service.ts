@@ -79,6 +79,9 @@ export class UrlService {
         $inc: {
           clicks: 1,
         },
+        $set: {
+          lastVisitedAt: new Date(),
+        },
       },
       {
         returnDocument: 'after',

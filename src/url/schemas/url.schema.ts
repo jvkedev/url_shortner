@@ -18,6 +18,9 @@ export class Url {
   @Prop({ default: 0 })
   clicks!: number;
 
+  @Prop({ default: null })
+  lastVisitedAt?: Date;
+
   createdAt!: Date;
   updatedAt!: Date;
 }
