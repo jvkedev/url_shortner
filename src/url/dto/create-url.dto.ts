@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsString, IsUrl, MaxLength } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateUrlDto {
   @IsString()
@@ -9,4 +16,7 @@ export class CreateUrlDto {
   })
   @MaxLength(2048)
   originalUrl!: string;
+  @IsDateString()
+  @IsOptional()
+  expiresAt?: string;
 }

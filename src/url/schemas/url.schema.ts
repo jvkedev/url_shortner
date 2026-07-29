@@ -21,6 +21,9 @@ export class Url {
   @Prop({ default: null })
   lastVisitedAt?: Date;
 
+  @Prop()
+  expiresAt?: Date;
+
   createdAt!: Date;
   updatedAt!: Date;
 }

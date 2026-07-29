@@ -28,7 +28,7 @@
 - [x] Click Count
 - [x] Last Visited
 - [x] Created Date
-- [ ] Expiration Date
+- [x] Expiration Date
 
 ---
 

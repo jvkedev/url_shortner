@@ -1,4 +1,5 @@
 import {
+  GoneException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -60,6 +61,7 @@ export class UrlService {
       originalUrl: createUrlDto.originalUrl,
       shortCode,
       owner: userId,
+      expiresAt: createUrlDto.expiresAt,
     });
 
     return {
@@ -73,8 +75,18 @@ export class UrlService {
   }
 
   async resolveShortUrl(shortCode: string) {
-    const url = await this.urlModel.findOneAndUpdate(
-      { shortCode },
+    const url = await this.urlModel.findOne({ shortCode });
+
+    if (!url) {
+      throw new NotFoundException('Url not found');
+    }
+
+    if (url?.expiresAt && url?.expiresAt < new Date()) {
+      throw new GoneException('Url has expired');
+    }
+
+    await this.urlModel.updateOne(
+      { _id: url._id },
       {
         $inc: {
           clicks: 1,
@@ -83,14 +95,7 @@ export class UrlService {
           lastVisitedAt: new Date(),
         },
       },
-      {
-        returnDocument: 'after',
-      },
     );
-
-    if (!url) {
-      throw new NotFoundException('Url not found');
-    }
 
     return url.originalUrl;
   }
