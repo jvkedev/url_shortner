@@ -15,6 +15,10 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { UrlModule } from './url/url.module';
 import configuration from './config/configuration';
+import {
+  ONE_MINUTE,
+  RATE_LIMITS,
+} from './common/constants/rate-limit.constants';
 
 @Module({
   imports: [
@@ -72,8 +76,8 @@ import configuration from './config/configuration';
       useFactory: () => ({
         throttlers: [
           {
-            ttl: 60000,
-            limit: 10,
+            ttl: RATE_LIMITS.GLOBAL,
+            limit: ONE_MINUTE,
           },
         ],
       }),

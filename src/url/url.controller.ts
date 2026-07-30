@@ -16,7 +16,13 @@ import { User as CurrentUser } from '../auth/decorators/user.decorator';
 import type { UserDocument } from '../user/schemas/user.schema';
 import { UpdateUrlDto } from './dto/update-url.dto';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { Throttle } from '@nestjs/throttler';
+import {
+  ONE_MINUTE,
+  RATE_LIMITS,
+} from '../common/constants/rate-limit.constants';
 
+@Throttle({ default: { limit: RATE_LIMITS.URL, ttl: ONE_MINUTE } })
 @Controller('url')
 export class UrlController {
   constructor(private readonly urlService: UrlService) {}
@@ -31,6 +37,12 @@ export class UrlController {
   }
 
   @Get(':shortCode')
+  @Throttle({
+    default: {
+      limit: RATE_LIMITS.REDIRECT,
+      ttl: ONE_MINUTE,
+    },
+  })
   @Redirect()
   async redirectToOriginalUrl(@Param('shortCode') shortCode: string) {
     const originalUrl = await this.urlService.resolveShortUrl(shortCode);

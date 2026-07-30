@@ -16,7 +16,7 @@
 ## 🔗 URL Features
 
 - [x] Create Short URL
-- [x] Redirect to Original URL  
+- [x] Redirect to Original URL
 - [x] Get User URLs
 - [x] Update URL
 - [x] Delete URL
@@ -35,7 +35,7 @@
 ## 🚀 Improvements
 
 - [x] Custom Alias
-- [ ] Rate Limiting
+- [x] Rate Limiting
 - [ ] Redis Caching
 - [ ] Unit Tests
 - [ ] Docker
