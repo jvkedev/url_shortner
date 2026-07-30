@@ -13,4 +13,7 @@ export default () => ({
   mailUser: process.env.MAIL_USER,
   mailPassword: process.env.MAIL_PASSWORD,
   mailFrom: process.env.MAIL_FROM,
+
+  redisHost: process.env.REDIS_HOST,
+  redisPort: Number(process.env.REDIS_PORT),
 });

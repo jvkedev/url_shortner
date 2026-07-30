@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Url } from './schemas/url.schema';
@@ -11,10 +12,16 @@ import { Model, Types } from 'mongoose';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UrlResponseDto } from './dto/url-response.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
+import { RedisService } from '../redis/redis.service';
+import { CACHE_TTL } from '../common/constants/app.constants';
 
 @Injectable()
 export class UrlService {
-  constructor(@InjectModel(Url.name) private urlModel: Model<Url>) {}
+  private readonly logger = new Logger(UrlService.name);
+  constructor(
+    @InjectModel(Url.name) private readonly urlModel: Model<Url>,
+    private readonly redisService: RedisService,
+  ) {}
 
   private readonly ALPHABET =
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -60,6 +67,20 @@ export class UrlService {
     );
   }
 
+  private updateUrlAnalytics(shortCode: string) {
+    void this.urlModel
+      .updateOne(
+        { shortCode },
+        {
+          $inc: { clicks: 1 },
+          $set: { lastVisitedAt: new Date() },
+        },
+      )
+      .catch((error) => {
+        this.logger.error(`Failed to update analytics for ${shortCode}`, error);
+      });
+  }
+
   async create(
     createUrlDto: CreateUrlDto,
     userId: Types.ObjectId,
@@ -101,6 +122,14 @@ export class UrlService {
   }
 
   async resolveShortUrl(shortCode: string) {
+    const cachedUrl = await this.redisService.get(`url:${shortCode}`);
+
+    if (cachedUrl) {
+      this.updateUrlAnalytics(shortCode);
+      return cachedUrl;
+    }
+
+    this.logger.log('Fetching URL from Mongodb');
     const url = await this.urlModel.findOne({ shortCode });
 
     if (!url) {
@@ -111,16 +140,12 @@ export class UrlService {
       throw new GoneException('Url has expired');
     }
 
-    await this.urlModel.updateOne(
-      { _id: url._id },
-      {
-        $inc: {
-          clicks: 1,
-        },
-        $set: {
-          lastVisitedAt: new Date(),
-        },
-      },
+    this.updateUrlAnalytics(shortCode);
+
+    await this.redisService.set(
+      `url:${shortCode}`,
+      url.originalUrl,
+      String(CACHE_TTL.URL),
     );
 
     return url.originalUrl;

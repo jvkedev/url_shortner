@@ -6,3 +6,7 @@ export const RATE_LIMITS = {
   REDIRECT: 1000,
   GLOBAL: 100,
 } as const;
+
+export const CACHE_TTL = {
+  URL: 3600,
+} as const;

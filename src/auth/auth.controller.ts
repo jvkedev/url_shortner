@@ -8,10 +8,7 @@ import { User as CurrentUser } from './decorators/user.decorator';
 import type { UserDocument } from '../user/schemas/user.schema';
 import { UserResponseDto } from './dto/user-response.dto';
 import { Throttle } from '@nestjs/throttler';
-import {
-  ONE_MINUTE,
-  RATE_LIMITS,
-} from '../common/constants/rate-limit.constants';
+import { ONE_MINUTE, RATE_LIMITS } from '../common/constants/app.constants';
 
 @Throttle({ default: { limit: RATE_LIMITS.AUTH, ttl: ONE_MINUTE } })
 @Controller('auth')

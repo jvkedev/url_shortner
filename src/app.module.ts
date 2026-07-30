@@ -15,10 +15,8 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { UrlModule } from './url/url.module';
 import configuration from './config/configuration';
-import {
-  ONE_MINUTE,
-  RATE_LIMITS,
-} from './common/constants/rate-limit.constants';
+import { ONE_MINUTE, RATE_LIMITS } from './common/constants/app.constants';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -87,6 +85,7 @@ import {
     AuthModule,
     MailModule,
     UrlModule,
+    RedisModule,
   ],
 
   controllers: [AppController],
