@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   GoneException,
   Injectable,
   InternalServerErrorException,
@@ -19,6 +20,14 @@ export class UrlService {
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
   private readonly MAX_RETRIES = 5;
+
+  private readonly RESERVED_ALIAS = [
+    'login',
+    'register',
+    'admin',
+    'api',
+    'health',
+  ];
 
   private generateShortCode(length: number): string {
     let shortCode = '';
@@ -55,7 +64,24 @@ export class UrlService {
     createUrlDto: CreateUrlDto,
     userId: Types.ObjectId,
   ): Promise<UrlResponseDto> {
-    const shortCode = await this.generateUniqueShortCode();
+    let shortCode: string;
+    const customAlias = createUrlDto.customAlias;
+
+    if (customAlias) {
+      if (this.RESERVED_ALIAS.includes(customAlias)) {
+        throw new ConflictException('This alias is reserved');
+      }
+
+      const exists = await this.shortCodeExists(customAlias);
+
+      if (exists) {
+        throw new ConflictException('Custom alias already exists');
+      }
+
+      shortCode = customAlias;
+    } else {
+      shortCode = await this.generateUniqueShortCode();
+    }
 
     const url = await this.urlModel.create({
       originalUrl: createUrlDto.originalUrl,

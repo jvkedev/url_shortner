@@ -34,7 +34,7 @@
 
 ## 🚀 Improvements
 
-- [ ] Custom Alias
+- [x] Custom Alias
 - [ ] Rate Limiting
 - [ ] Redis Caching
 - [ ] Unit Tests
