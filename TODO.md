@@ -39,5 +39,5 @@
 - [x] Redis Caching
 - [x] Unit Tests
 - [x] Docker
-- [ ] CI/CD
+- [x] CI/CD
 - [ ] Deployment
