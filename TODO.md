@@ -37,7 +37,7 @@
 - [x] Custom Alias
 - [x] Rate Limiting
 - [x] Redis Caching
-- [ ] Unit Tests
-- [ ] Docker
+- [x] Unit Tests
+- [x] Docker
 - [ ] CI/CD
 - [ ] Deployment
